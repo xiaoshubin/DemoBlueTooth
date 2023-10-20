@@ -36,4 +36,26 @@
         android:layout_height="wrap_content"
         android:onClick="close"
         android:text="关闭蓝牙" />
+    <Button
+        android:id="@+id/button_enable_visiably"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="enableVisiably"
+        android:text="蓝牙可见性" />
+    <Button
+        android:id="@+id/button_find"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="find"
+        android:text="查找设备" />
+    <Button
+        android:id="@+id/button_get_device_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getDeviceList"
+        android:text="获取蓝牙设备列表" />
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 </androidx.appcompat.widget.LinearLayoutCompat>

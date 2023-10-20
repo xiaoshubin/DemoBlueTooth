@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.smallcake.demo.demobluetooth.BluetoothController.bluetoothAdapter
+import java.util.*
 
 /**
  * 蓝牙适配器
@@ -62,7 +63,7 @@ object BluetoothController {
      * 获取蓝牙设备列表
      */
     @SuppressLint("MissingPermission")
-    fun getBindDeviceList(): List<BluetoothDevice>? {
+    fun getBindDeviceList(): List<BluetoothDevice> {
         return (bluetoothAdapter.bondedDevices).toList()
     }
 
