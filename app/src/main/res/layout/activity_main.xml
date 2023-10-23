@@ -41,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="enableVisiably"
-        android:text="蓝牙可见性" />
+        android:text="可见性" />
     <Button
         android:id="@+id/button_find"
         android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="getDeviceList"
-        android:text="获取蓝牙设备列表" />
+        android:text="已绑定设备" />
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"

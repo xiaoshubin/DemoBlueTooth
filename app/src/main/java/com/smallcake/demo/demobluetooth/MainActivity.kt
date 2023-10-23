@@ -1,22 +1,25 @@
 package com.smallcake.demo.demobluetooth
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.hjq.permissions.Permission
+import com.hjq.permissions.XXPermissions
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -34,6 +37,32 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = mAdapter
+        mAdapter.setOnItemClickListener{adapter,view,position->
+            val item = adapter.getItem(position) as BluetoothDevice
+            AlertDialog.Builder(this@MainActivity)
+                .setTitle("提醒")
+                .setMessage("是否绑定设备:${item.name}")
+                .setNegativeButton("取消",null)
+                .setPositiveButton("确定") { dialog, which ->
+                    XXPermissions.with(this)
+                        .permission(Permission.BLUETOOTH_CONNECT)
+                        .request{p,all->
+                            if (all)item.createBond()//点击后进行绑定
+                        }
+
+                }
+                .create().show()
+
+        }
+        registerBluetoothReceiver()
+
+
+    }
+
+    /**
+     * 注册蓝牙广播
+     */
+    private fun registerBluetoothReceiver() {
         //注册广播,监听蓝牙状态
         val filter = IntentFilter()
         //开始查找
@@ -47,9 +76,7 @@ class MainActivity : AppCompatActivity() {
         //绑定状态
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
         //注册广播
-        registerReceiver(mReceiver,filter)
-
-
+        registerReceiver(mReceiver, filter)
     }
 
     private val  mReceiver = object: BroadcastReceiver() {
@@ -61,11 +88,12 @@ class MainActivity : AppCompatActivity() {
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED->{
                     Log.i(TAG,"结束查找")
+                    showToast("结束查找")
                 }
                 BluetoothAdapter.ACTION_SCAN_MODE_CHANGED->{
                     val scanMode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE,0)
                     Log.i(TAG,"设备扫描模式改变[$scanMode]")
-                    if (scanMode==BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){
+                    if (scanMode==BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){//状态可见
                         Log.i(TAG,"设备扫描模式改变[$scanMode]")
                     }else{
                         Log.i(TAG,"设备扫描模式改变[$scanMode]")
@@ -73,9 +101,31 @@ class MainActivity : AppCompatActivity() {
                 }
                 BluetoothDevice.ACTION_FOUND->{
                     Log.i(TAG,"查找设备")
+                    val device : BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val isAdd =  mAdapter.items.find { it.address==device?.address }!=null
+                    if (!isAdd)device?.let { mAdapter.add(it) }
                 }
+                /**
+                 * 蓝牙绑定状态：
+                BOND_NONE：远程设备未绑定。
+                BOND_BONDING：正在与远程设备进行绑定。
+                BOND_BONDED：远程设备已绑定。
+                 只有没有绑定过的设备才能绑定,否则调用createBond()后,这里不会接收到绑定状态的改变
+                 */
                 BluetoothDevice.ACTION_BOND_STATE_CHANGED->{
                     Log.i(TAG,"绑定状态")
+                    val device : BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    if (device==null){
+                        showToast("暂无设备")
+                        return
+                    }
+                    when(intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,0)){
+                        BluetoothDevice.BOND_BONDED->Log.i(TAG,"Bonded ${device.name}")
+                        BluetoothDevice.BOND_BONDING->Log.i(TAG,"Bonding ${device.name}")
+                        BluetoothDevice.BOND_NONE->Log.i(TAG,"not bond ${device.name}")
+
+                    }
+
                 }
             }
         }
@@ -103,11 +153,12 @@ class MainActivity : AppCompatActivity() {
         BluetoothController.enableVisiably(this)
     }
     fun find(view: View){
-        BluetoothController.findDevice()
+        mAdapter.submitList(null)
+        BluetoothController.findDevice(this)
     }
     fun getDeviceList(view: View){
         val list = BluetoothController.getBindDeviceList()
-        mAdapter.addAll(list)
+        mAdapter.submitList(list)
     }
     private fun showToast(text:String){
         if (mToast==null)mToast = Toast.makeText(this@MainActivity,text,Toast.LENGTH_SHORT)

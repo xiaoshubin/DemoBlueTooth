@@ -1,13 +1,11 @@
 package com.smallcake.demo.demobluetooth
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.pm.PackageManager
+import android.text.TextUtils
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.app.ActivityCompat
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.QuickViewHolder
 
@@ -15,7 +13,8 @@ import com.chad.library.adapter.base.viewholder.QuickViewHolder
 class DeviceAdapter : BaseQuickAdapter<BluetoothDevice, QuickViewHolder>() {
     @SuppressLint("MissingPermission")
     override fun onBindViewHolder(holder: QuickViewHolder, position: Int, item: BluetoothDevice?) {
-        holder.getView<TextView>(R.id.textView).text = item?.name
+        if (item==null)return
+        holder.getView<TextView>(R.id.textView).text = "${item.name} - ${item.address}"
     }
 
     override fun onCreateViewHolder(

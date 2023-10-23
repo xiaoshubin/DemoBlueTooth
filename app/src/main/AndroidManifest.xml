@@ -5,6 +5,12 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+   <!--发现周边蓝牙设备 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--要求设备硬件必须支持蓝牙-->
+    <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
 
     <application
         android:allowBackup="true"
