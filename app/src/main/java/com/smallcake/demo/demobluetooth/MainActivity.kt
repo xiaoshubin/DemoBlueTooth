@@ -1,12 +1,12 @@
 package com.smallcake.demo.demobluetooth
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
-import android.content.*
-import android.content.pm.PackageManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,12 +15,10 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hjq.permissions.Permission
 import com.hjq.permissions.XXPermissions
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private  val TAG = "蓝牙Demo"
@@ -47,7 +45,11 @@ class MainActivity : AppCompatActivity() {
                     XXPermissions.with(this)
                         .permission(Permission.BLUETOOTH_CONNECT)
                         .request{p,all->
-                            if (all)item.createBond()//点击后进行绑定
+                            if (all){//点击后进行绑定
+//                                item.createBond()
+                                BluetoothController.unpair(item)
+
+                            }
                         }
 
                 }
@@ -102,8 +104,8 @@ class MainActivity : AppCompatActivity() {
                 BluetoothDevice.ACTION_FOUND->{
                     Log.i(TAG,"查找设备")
                     val device : BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    val isAdd =  mAdapter.items.find { it.address==device?.address }!=null
-                    if (!isAdd)device?.let { mAdapter.add(it) }
+                    val isAdd =  mAdapter.data.find { it.address==device?.address }!=null
+                    if (!isAdd)device?.let { mAdapter.addData(it) }
                 }
                 /**
                  * 蓝牙绑定状态：
@@ -153,12 +155,12 @@ class MainActivity : AppCompatActivity() {
         BluetoothController.enableVisiably(this)
     }
     fun find(view: View){
-        mAdapter.submitList(null)
+        mAdapter.setList(null)
         BluetoothController.findDevice(this)
     }
     fun getDeviceList(view: View){
         val list = BluetoothController.getBindDeviceList()
-        mAdapter.submitList(list)
+        mAdapter.setList(list)
     }
     private fun showToast(text:String){
         if (mToast==null)mToast = Toast.makeText(this@MainActivity,text,Toast.LENGTH_SHORT)
