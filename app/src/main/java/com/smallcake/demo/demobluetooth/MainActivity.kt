@@ -3,6 +3,8 @@ package com.smallcake.demo.demobluetooth
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,6 +15,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     private var mToast:Toast? = null
     private lateinit var recyclerView:RecyclerView
     private val mAdapter = DeviceAdapter()
+    private var bluetoothGatt:BluetoothGatt?=null
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -37,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = mAdapter
         mAdapter.setOnItemClickListener{adapter,view,position->
             val item = adapter.getItem(position) as BluetoothDevice
+
             AlertDialog.Builder(this@MainActivity)
                 .setTitle("提醒")
                 .setMessage("是否绑定设备:${item.name}")
@@ -47,7 +53,21 @@ class MainActivity : AppCompatActivity() {
                         .request{p,all->
                             if (all){//点击后进行绑定
 //                                item.createBond()
-                                BluetoothController.unpair(item)
+//                                BluetoothController.unpair(item)
+                                //自动连接:多数系统30秒后会自动超时并返回133的状态
+                                 bluetoothGatt  = item.connectGatt(this,false,object :BluetoothGattCallback(){
+                                    override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+                                        super.onConnectionStateChange(gatt, status, newState)
+                                        Log.e(TAG,"蓝牙连接状态:status[$status] newState[$newState]")
+                                        //超时或断开连接后
+                                        if (item.type !=BluetoothDevice.DEVICE_TYPE_UNKNOWN){
+                                            bluetoothGatt?.connect()
+                                        }else{
+                                            bluetoothGatt?.close()
+                                            bluetoothGatt = item.connectGatt(this@MainActivity,false,this,BluetoothDevice.TRANSPORT_LE)
+                                        }
+                                    }
+                                },BluetoothDevice.TRANSPORT_LE)
 
                             }
                         }

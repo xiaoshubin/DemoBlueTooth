@@ -5,7 +5,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!--Android 12 引入了 BLUETOOTH_SCAN 、 BLUETOOTH_ADVERTISE 和 BLUETOOTH_CONNECT 权限，
+    可让应用 扫描附近的设备(NearBy)，而无需请求位置权限(ACCESS_FINE_LOCATION)-->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
    <!--发现周边蓝牙设备 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
